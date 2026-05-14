@@ -31,15 +31,41 @@ export function getVapi(): Vapi {
  *   Marcus Williams → Josh     (calmo, mentor — career coach)
  *   Diana Kim       → Domi     (autoritativa — jefa)
  */
-function getVoiceForInterviewer(name: string): string {
-  const mapping: Record<string, string> = {
-    "Sarah Chen": "EXAVITQu4vr4xnSDxMaL",       // Bella
-    "David Park": "ErXwobaYiN019PkySvjV",        // Antoni
-    "Jamie Reeves": "21m00Tcm4TlvDq8ikWAM",      // Rachel
-    "Marcus Williams": "TxGEqnHWrfWFTfGW9XjX",   // Josh
-    "Diana Kim": "AZnzlk1XvdvUeBnXmlld",         // Domi
-  };
-  return mapping[name] ?? "TxGEqnHWrfWFTfGW9XjX"; // Default: Josh
+const TEMPLATE_VOICES: Record<string, string> = {
+  "Sarah Chen": "EXAVITQu4vr4xnSDxMaL",       // Bella
+  "David Park": "ErXwobaYiN019PkySvjV",        // Antoni
+  "Jamie Reeves": "21m00Tcm4TlvDq8ikWAM",      // Rachel
+  "Marcus Williams": "TxGEqnHWrfWFTfGW9XjX",   // Josh
+  "Diana Kim": "AZnzlk1XvdvUeBnXmlld",         // Domi
+};
+
+// Pools de voces por genero para scenarios generados dinamicamente
+const FEMALE_VOICES = [
+  "EXAVITQu4vr4xnSDxMaL", // Bella
+  "21m00Tcm4TlvDq8ikWAM", // Rachel
+  "AZnzlk1XvdvUeBnXmlld", // Domi
+];
+
+const MALE_VOICES = [
+  "ErXwobaYiN019PkySvjV", // Antoni
+  "TxGEqnHWrfWFTfGW9XjX", // Josh
+];
+
+function getVoiceForScenario(scenario: {
+  id: string;
+  interviewer_name: string;
+  voice_gender?: "male" | "female" | null;
+}): string {
+  // Template match: voz hardcodeada para los 5 originales
+  const templateVoice = TEMPLATE_VOICES[scenario.interviewer_name];
+  if (templateVoice) return templateVoice;
+
+  // Dynamic: pool por genero, pick deterministico por hash del id
+  const pool = scenario.voice_gender === "male" ? MALE_VOICES : FEMALE_VOICES;
+  const hash = scenario.id
+    .split("")
+    .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return pool[hash % pool.length];
 }
 
 /**
@@ -51,10 +77,12 @@ function getVoiceForInterviewer(name: string): string {
  *   - TTS: ElevenLabs eleven_turbo_v2_5 (calidad premium + baja latencia)
  */
 export function buildAssistantConfig(scenario: {
+  id: string;
   interviewer_name: string;
   interviewer_persona: string;
   language: string;
   duration_minutes: number;
+  voice_gender?: "male" | "female" | null;
 }) {
   return {
     name: scenario.interviewer_name,
@@ -74,7 +102,7 @@ export function buildAssistantConfig(scenario: {
 
     voice: {
       provider: "11labs" as const,
-      voiceId: getVoiceForInterviewer(scenario.interviewer_name),
+      voiceId: getVoiceForScenario(scenario),
       // Turbo v2.5: la mejor combinación de calidad y latencia para conversación
       model: "eleven_turbo_v2_5",
     },

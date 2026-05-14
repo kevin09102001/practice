@@ -50,7 +50,10 @@ export type Database = {
           difficulty: number;
           interviewer_name: string;
           interviewer_persona: string;
+          voice_gender: "male" | "female" | null;
           is_active: boolean;
+          is_template: boolean;
+          user_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -65,7 +68,10 @@ export type Database = {
           difficulty: number;
           interviewer_name: string;
           interviewer_persona: string;
+          voice_gender?: "male" | "female" | null;
           is_active?: boolean;
+          is_template?: boolean;
+          user_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -80,7 +86,10 @@ export type Database = {
           difficulty?: number;
           interviewer_name?: string;
           interviewer_persona?: string;
+          voice_gender?: "male" | "female" | null;
           is_active?: boolean;
+          is_template?: boolean;
+          user_id?: string | null;
           created_at?: string;
         };
         Relationships: [];
