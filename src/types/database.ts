@@ -177,6 +177,34 @@ export type Database = {
         };
         Relationships: [];
       };
+
+      waitlist: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string;
+          reason: string | null;
+          source: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email: string;
+          reason?: string | null;
+          source?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string;
+          reason?: string | null;
+          source?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
 
     Views: Record<string, never>;

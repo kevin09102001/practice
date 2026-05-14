@@ -12,6 +12,21 @@ export async function startSessionAction(scenarioId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // ─────────────────────────────────────────────────────────
+  // CAP: 2 sesiones gratis por cuenta (no contamos abandonadas).
+  // Si user ya las uso, va al waitlist en vez de crear sesion.
+  // ─────────────────────────────────────────────────────────
+  const { count: sessionsUsed } = await supabase
+    .from("sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .neq("status", "abandoned");
+
+  const FREE_SESSIONS = 2;
+  if (sessionsUsed !== null && sessionsUsed >= FREE_SESSIONS) {
+    redirect("/waitlist?source=cap");
+  }
+
   const { data: session, error } = await supabase
     .from("sessions")
     .insert({
